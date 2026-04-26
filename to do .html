@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultra Premium To-Do</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI';}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(270deg,#0f172a,#1e3a8a,#0ea5e9,#22c55e);
+    background-size:800% 800%;
+    animation:bgMove 14s ease infinite;
+}
+
+@keyframes bgMove{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+.dark{background:#020617;}
+
+.container{
+    width:430px;
+    padding:20px;
+    border-radius:20px;
+    backdrop-filter:blur(25px);
+    background:rgba(255,255,255,0.08);
+    color:white;
+
+    /* 🔵 Navy Border */
+    border:2px solid rgba(30,64,175,0.8);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.4),
+        0 0 25px rgba(30,64,175,0.4);
+
+    transition:all 0.35s ease;
+}
+
+/* ✨ Smooth floating */
+.container:hover{
+    transform:translateY(-6px);
+    border-color:#3b82f6;
+    box-shadow:
+        0 20px 40px rgba(0,0,0,0.5),
+        0 0 40px rgba(59,130,246,0.6);
+}
+
+.hidden{display:none;}
+.center{text-align:center;}
+
+input,select{
+    width:100%;
+    padding:10px;
+    margin-top:6px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.2);
+    background:rgba(255,255,255,0.15);
+    color:white;
+    outline:none;
+    transition:0.25s;
+}
+
+/* ✨ Input animation */
+input:focus, select:focus{
+    border-color:#60a5fa;
+    box-shadow:0 0 10px rgba(96,165,250,0.7);
+    transform:scale(1.02);
+}
+
+/* 🔥 BUTTON */
+button{
+    padding:8px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    margin-top:6px;
+    position:relative;
+    overflow:hidden;
+    transition:all 0.25s ease;
+}
+
+/* ✨ shine */
+button::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-100%;
+    width:100%;
+    height:100%;
+    background:linear-gradient(120deg,transparent,rgba(255,255,255,0.5),transparent);
+    transition:0.5s;
+}
+
+button:hover::before{
+    left:100%;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 15px rgba(0,0,0,0.3);
+}
+
+button:active{
+    transform:scale(0.95);
+}
+
+.add{background:#3b82f6;color:white;}
+.delete{background:#ef4444;color:white;}
+.edit{background:#f59e0b;color:white;}
+
+li{
+    background:rgba(255,255,255,0.12);
+    padding:12px;
+    margin-top:12px;
+    border-radius:12px;
+    backdrop-filter:blur(12px);
+    animation:fadeIn 0.4s ease;
+    transition:all 0.25s ease;
+}
+
+/* ✨ task animation */
+li:hover{
+    transform:translateY(-3px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.35);
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(15px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+.completed span{
+    text-decoration:line-through;
+    opacity:0.6;
+}
+
+.fav{border-left:4px solid gold;}
+.overdue{border-left:4px solid #ef4444;}
+
+.progress{
+    height:8px;
+    background:rgba(255,255,255,0.2);
+    border-radius:10px;
+    margin-top:10px;
+}
+
+.bar{
+    height:100%;
+    background:#3b82f6;
+    width:0%;
+    border-radius:10px;
+    transition:0.4s ease;
+}
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.tag{
+    font-size:10px;
+    padding:3px 6px;
+    border-radius:6px;
+    background:rgba(0,0,0,0.5);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div id="home" class="center">
+<h1>✨ Ultra To-Do</h1>
+<p>Smart Productivity App</p>
+<button onclick="goAuth()">Start</button>
+</div>
+
+<div id="auth" class="hidden">
+<h2 class="center">Login / Signup</h2>
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="signup()">Signup</button>
+<button onclick="login()">Login</button>
+</div>
+
+<div id="app" class="hidden">
+
+<div class="top">
+<h3 id="welcome"></h3>
+<div>
+<button onclick="toggleDark()">🌙</button>
+<button onclick="logout()">🚪</button>
+</div>
+</div>
+
+<input id="taskInput" placeholder="Task">
+<input type="date" id="deadline">
+
+<select id="category">
+<option>Work</option>
+<option>Personal</option>
+<option>Study</option>
+</select>
+
+<button class="add" onclick="addTask()">Add</button>
+
+<input id="search" placeholder="Search..." onkeyup="render()">
+
+<div>
+<button onclick="setFilter('all')">All</button>
+<button onclick="setFilter('today')">Today</button>
+<button onclick="setFilter('month')">30 Days</button>
+<button onclick="setFilter('fav')">⭐ Fav</button>
+</div>
+
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div id="stats"></div>
+
+<ul id="list"></ul>
+
+</div>
+
+</div>
+
+<script>
+let currentUser=null,tasks=[],filter="all";
+
+function goAuth(){home.classList.add("hidden");auth.classList.remove("hidden");}
+
+function signup(){
+let u=user.value,p=pass.value;
+if(!u||!p)return alert("Fill");
+localStorage.setItem("user_"+u,p);
+alert("Signup ok");
+}
+
+function login(){
+let u=user.value,p=pass.value;
+if(localStorage.getItem("user_"+u)===p){
+currentUser=u;
+tasks=JSON.parse(localStorage.getItem("tasks_"+u))||[];
+auth.classList.add("hidden");
+app.classList.remove("hidden");
+welcome.innerText="Hi "+u;
+render();
+}else alert("Invalid");
+}
+
+function logout(){location.reload();}
+
+function save(){localStorage.setItem("tasks_"+currentUser,JSON.stringify(tasks));}
+
+function addTask(){
+let t=taskInput.value.trim();
+let d=deadline.value;
+let c=category.value;
+if(!t)return;
+
+tasks.push({text:t,done:false,date:new Date().toISOString(),deadline:d,cat:c,fav:false});
+taskInput.value="";deadline.value="";
+save();render();
+}
+
+function toggle(i){tasks[i].done=!tasks[i].done;save();render();}
+function del(i){tasks.splice(i,1);save();render();}
+function fav(i){tasks[i].fav=!tasks[i].fav;save();render();}
+function setFilter(f){filter=f;render();}
+
+function check(t){
+let now=new Date(),d=new Date(t.date);
+if(filter==="today") return d.toDateString()===now.toDateString();
+if(filter==="month"){let m=new Date();m.setDate(m.getDate()-30);return d>=m;}
+if(filter==="fav") return t.fav;
+return true;
+}
+
+function render(){
+let list=document.getElementById("list");
+let s=document.getElementById("search").value.toLowerCase();
+list.innerHTML="";
+
+let visible=tasks.filter(t=>check(t)&&t.text.toLowerCase().includes(s));
+
+visible.forEach(t=>{
+let i=tasks.indexOf(t);
+let overdue = t.deadline && new Date(t.deadline)<new Date() && !t.done;
+
+let li=document.createElement("li");
+li.className=(t.done?"completed ":"")+(t.fav?"fav ":"")+(overdue?"overdue":"");
+
+li.innerHTML=`
+<span onclick="toggle(${i})">${t.text}</span>
+<br><small>${new Date(t.date).toLocaleString()}</small>
+<br><span class="tag">${t.cat}</span>
+${t.deadline?`<span class="tag">📅 ${t.deadline}</span>`:''}
+<br>
+<button onclick="fav(${i})">⭐</button>
+<button class="delete" onclick="del(${i})">🗑</button>
+`;
+
+list.appendChild(li);
+});
+
+updateStats();
+}
+
+function updateStats(){
+let total=tasks.length;
+let done=tasks.filter(t=>t.done).length;
+let favs=tasks.filter(t=>t.fav).length;
+
+stats.innerText=`Total:${total} | Done:${done} | Fav:${favs}`;
+bar.style.width=(total?done/total*100:0)+"%";
+}
+
+function toggleDark(){document.body.classList.toggle("dark");}
+</script>
+
+</body>
+</html>
